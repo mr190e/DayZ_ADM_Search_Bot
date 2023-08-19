@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const glob = require('glob');
 const readline = require('readline');
 const { Client, Intents } = require('discord.js');
@@ -16,6 +16,13 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 client.once('ready', () => {
   console.log(`Bot connected as ${client.user.tag}`);
 });
+
+async function isFileInSearchRange(file, searchStart, searchEnd) {
+  const { birthtime } = await fs.promises.stat(file);
+  const fileCreationTime = moment(birthtime);
+  const fileLogStartTime = moment(fileCreationTime).subtract(3, 'hours');
+  return searchStart.isBefore(fileCreationTime) && searchEnd.isAfter(fileLogStartTime);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // -- /search-keyword command
@@ -44,7 +51,8 @@ client.on('messageCreate', async (message) => {
   let searchResults = [];
 
   for (const file of files) {
-    console.log(`Searching in file: ${file}`);
+    if (await isFileInSearchRange(file, searchStart, searchEnd)) {
+      console.log(`Searching in file: ${file}`);
     const fileStream = fs.createReadStream(file);
     const rl = readline.createInterface({
       input: fileStream,
@@ -131,8 +139,9 @@ client.on('messageCreate', async (message) => {
     let searchResults = [];
 
     // Iterate over each file
-    for (const file of files) {
-      console.log(`Searching in file: ${file}`);
+   for (const file of files) {
+     if (await isFileInSearchRange(file, searchStart, searchEnd)) {
+       console.log(`Searching in file: ${file}`);
       // Create a read stream for each file
       const fileStream = fs.createReadStream(file);
 
@@ -227,7 +236,8 @@ client.on('messageCreate', async (message) => {
     let searchResults = [];
 
     for (const file of files) {
-      console.log(`Searching in file: ${file}`);
+      if (await isFileInSearchRange(file, searchStart, searchEnd)) {
+        console.log(`Searching in file: ${file}`);
       const fileStream = fs.createReadStream(file);
       const rl = readline.createInterface({
         input: fileStream,
