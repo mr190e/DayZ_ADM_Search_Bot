@@ -1,0 +1,6 @@
+{
+  "token": "Discord-Bot-Token",
+  "channelId": "Channel-ID",
+  "filepath": "C:/path/2/server/logs",
+  "filetype": ".ADM"
+}
